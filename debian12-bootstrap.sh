@@ -6,11 +6,12 @@
 
 function print_help {
   echo ""
-  echo "Usage: $(basename $0) [ --enable-ipv6 ] [ --disable-ssh-keys ]"
+  echo "Usage: $(basename $0) [ --ipv6 ] [ --add-ssh-keys ] [ --enable-pxm ]"
   echo ""
-  echo "    --ipv6            Leave IPv6 support enabled"
+  echo "    --ipv6            Leave IPv6 protocol enabled"
   echo "    --add-ssh-keys    Add SSH keys to authorized_keys"
-  echo "    -h | --help       Print this message and exit"
+  echo "    --enable-pxm      Add Proxmox-specific configuration"
+  echo "    -h | --help       Print this help message and exit"
   echo ""
   exit 63
 }
@@ -20,6 +21,7 @@ function args_parse() {
     case "$1" in
       --ipv6) ENABLE_IPV6=1 ;;
       --add-ssh-keys) ADD_SSH_KEYS=1 ;;
+      --enable-pxm) ENABLE_PXM=1 ;;
       -h|--help) PRINT_HELP=1 ;;
       *) echo; echo "Bad option: $1"; print_help ;;
     esac
@@ -129,6 +131,11 @@ if [ ! -z $ADD_SSH_KEYS ]; then
   done
   echo "done"
 fi
+
+echo -n "Setting up nanorc: "
+sed -i 's/# set tabsize 8/set tabsize 2/' /etc/nanorc
+sed -i 's/# set tabstospaces/set tabstospaces/' /etc/nanorc
+echo "done"
 
 echo -n "Setting up sources.list: "
 cat << EOF > /etc/apt/sources.list && echo "done" || echo "failed!"
