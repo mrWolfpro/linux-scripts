@@ -84,6 +84,7 @@ function set_ssh_keys() {
 user=$1
 if [ $user = 'root' ]; then
   echo "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPn+z0a0dIYNoWb0k2cUTy+1gLs3wVB4NCq0d7po/whmgpEBe7bSlo64hUSzj6Xd53dINcPSKJfFihJmxOIN2oo=" >> /root/.ssh/authorized_keys
+  echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsBJfZ0dOcVLiol9i2QSySDMKlhC5MOhjzXB17ydInw" >> /root/.ssh/authorized_keys
 else
   if [ -d /home/$user ]; then
     group=$user
@@ -91,6 +92,7 @@ else
     chmod 0700 /home/$user/.ssh
     chown $user:$group /home/$user/.ssh
     echo "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPn+z0a0dIYNoWb0k2cUTy+1gLs3wVB4NCq0d7po/whmgpEBe7bSlo64hUSzj6Xd53dINcPSKJfFihJmxOIN2oo=" >> /home/$user/.ssh/authorized_keys
+    echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsBJfZ0dOcVLiol9i2QSySDMKlhC5MOhjzXB17ydInw" >> /home/$user/.ssh/authorized_keys
   fi
 fi
 }
