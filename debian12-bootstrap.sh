@@ -52,9 +52,10 @@ function set_bashrc_vars() {
 cat << 'EOF' >> $1
 
 alias ll='ls -l'
-alias p='ping'
-alias t='traceroute'
+alias lla='ls -la'
 alias tailf='tail -f'
+alias t='traceroute'
+alias p='ping'
 
 if [ $(/usr/bin/whoami) = 'root' ]; then
   if [ "$TERM" != 'dumb'  ] && [ -n "$BASH" ]; then
@@ -139,14 +140,14 @@ echo "done"
 
 echo -n "Setting up sources.list: "
 cat << EOF > /etc/apt/sources.list && echo "done" || echo "failed!"
-deb http://mirror.mephi.ru/debian/ bookworm main
-deb-src http://mirror.mephi.ru/debian/ bookworm main
+deb http://mirror.yandex.ru/debian/ bookworm main
+deb-src http://mirror.yandex.ru/debian/ bookworm main
 
 deb http://security.debian.org/debian-security bookworm-security main
 deb-src http://security.debian.org/debian-security bookworm-security main
 
-deb http://mirror.mephi.ru/debian/ bookworm-updates main
-deb-src http://mirror.mephi.ru/debian/ bookworm-updates main
+deb http://mirror.yandex.ru/debian/ bookworm-updates main
+deb-src http://mirror.yandex.ru/debian/ bookworm-updates main
 EOF
 
 echo -n "Updating system software: "
