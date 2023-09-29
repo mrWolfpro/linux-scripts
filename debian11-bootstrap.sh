@@ -81,6 +81,7 @@ function set_ssh_keys() {
 user=$1
 if [ $user = 'root' ]; then
   echo "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPn+z0a0dIYNoWb0k2cUTy+1gLs3wVB4NCq0d7po/whmgpEBe7bSlo64hUSzj6Xd53dINcPSKJfFihJmxOIN2oo=" >> /root/.ssh/authorized_keys
+  echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsBJfZ0dOcVLiol9i2QSySDMKlhC5MOhjzXB17ydInw" >> /root/.ssh/authorized_keys
 else
   if [ -d /home/$user ]; then
     group=$user
@@ -88,6 +89,7 @@ else
     chmod 0700 /home/$user/.ssh
     chown $user:$group /home/$user/.ssh
     echo "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPn+z0a0dIYNoWb0k2cUTy+1gLs3wVB4NCq0d7po/whmgpEBe7bSlo64hUSzj6Xd53dINcPSKJfFihJmxOIN2oo=" >> /home/$user/.ssh/authorized_keys
+    echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsBJfZ0dOcVLiol9i2QSySDMKlhC5MOhjzXB17ydInw" >> /root/.ssh/authorized_keys
   fi
 fi
 }
@@ -131,20 +133,20 @@ if [ ! -z $ADD_SSH_KEYS ]; then
 fi
 
 echo -n "Setting up nanorc: "
-sed -i 's/# set tabsize 8/set tabsize 2/' /etc/nanorc
-sed -i 's/# set tabstospaces/set tabstospaces/' /etc/nanorc
+sed -i 's/# set tabsize 8/set tabsize 4/' /etc/nanorc
+#sed -i 's/# set tabstospaces/set tabstospaces/' /etc/nanorc
 echo "done"
 
 echo -n "Setting up sources.list: "
 cat << EOF > /etc/apt/sources.list && echo "done" || echo "failed!"
-deb http://mirror.mephi.ru/debian/ bullseye main
-deb-src http://mirror.mephi.ru/debian/ bullseye main
+deb http://mirror.yandex.ru/debian/ bullseye main
+deb-src http://mirror.yandex.ru/debian/ bullseye main
 
 deb http://security.debian.org/debian-security bullseye-security main
 deb-src http://security.debian.org/debian-security bullseye-security main
 
-deb http://mirror.mephi.ru/debian/ bullseye-updates main
-deb-src http://mirror.mephi.ru/debian/ bullseye-updates main
+deb http://mirror.yandex.ru/debian/ bullseye-updates main
+deb-src http://mirror.yandex.ru/debian/ bullseye-updates main
 EOF
 
 echo -n "Updating system software: "
