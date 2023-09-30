@@ -157,7 +157,7 @@ apt update > /dev/null 2>&1 || "echo failed!; exit 10"
 apt upgrade -y > /dev/null 2>&1 && echo done || "echo failed!; exit 11"
 
 echo -n "Installing additional software: "
-apt install -y command-not-found curl dnsutils htop net-tools sockstat sysstat tcpdump traceroute $platform_agent > /dev/null 2>&1 && echo done || "echo failed!; exit 12"
+apt install -y command-not-found curl dnsutils haveged htop net-tools sockstat sysstat tcpdump traceroute $platform_agent > /dev/null 2>&1 && echo done || "echo failed!; exit 12"
 echo -n "Performing cleanup: "
 apt-file update > /dev/null 2>&1 || "echo failed!; exit 13"
 update-command-not-found > /dev/null 2>&1 && echo done || "echo failed!; exit 14"
