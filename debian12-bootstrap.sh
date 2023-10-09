@@ -136,8 +136,8 @@ if [ ! -z $ADD_SSH_KEYS ]; then
 fi
 
 echo -n "Setting up nanorc: "
-sed -i 's/# set tabsize 8/set tabsize 2/' /etc/nanorc
-sed -i 's/# set tabstospaces/set tabstospaces/' /etc/nanorc
+sed -i 's/# set tabsize 8/set tabsize 4/' /etc/nanorc
+#sed -i 's/# set tabstospaces/set tabstospaces/' /etc/nanorc
 echo "done"
 
 echo -n "Setting up sources.list: "
