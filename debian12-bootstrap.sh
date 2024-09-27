@@ -6,12 +6,13 @@
 
 function print_help {
   echo ""
-  echo "Usage: $(basename $0) [ --ipv6 ] [ --add-ssh-keys ] [ --enable-pxm ]"
+  echo "Usage: $(basename $0) [ --ipv6 ] [ --add-ssh-keys ] [ --enable-root-login ] [ --enable-pxm ]"
   echo ""
-  echo "    --ipv6            Leave IPv6 protocol enabled"
-  echo "    --add-ssh-keys    Add SSH keys to authorized_keys"
-  echo "    --enable-pxm      Add Proxmox-specific configuration"
-  echo "    -h | --help       Print this help message and exit"
+  echo "    --ipv6                Leave IPv6 protocol enabled"
+  echo "    --add-ssh-keys        Add SSH keys to authorized_keys"
+  echo "    --enable-root-login   Permit root login with password"
+  echo "    --enable-pxm          Add Proxmox-specific configuration"
+  echo "    -h | --help           Print this help message and exit"
   echo ""
   exit 63
 }
@@ -21,6 +22,7 @@ function args_parse() {
     case "$1" in
       --ipv6) ENABLE_IPV6=1 ;;
       --add-ssh-keys) ADD_SSH_KEYS=1 ;;
+      --enable-root-login) PERMIT_ROOT=1 ;;
       --enable-pxm) ENABLE_PXM=1 ;;
       -h|--help) PRINT_HELP=1 ;;
       *) echo; echo "Bad option: $1"; print_help ;;
@@ -83,16 +85,14 @@ sysctl -p /etc/sysctl.d/90-disable-ipv6.conf > /dev/null 2>&1
 function set_ssh_keys() {
 user=$1
 if [ $user = 'root' ]; then
-  echo "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPn+z0a0dIYNoWb0k2cUTy+1gLs3wVB4NCq0d7po/whmgpEBe7bSlo64hUSzj6Xd53dINcPSKJfFihJmxOIN2oo=" >> /root/.ssh/authorized_keys
-  echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsBJfZ0dOcVLiol9i2QSySDMKlhC5MOhjzXB17ydInw" >> /root/.ssh/authorized_keys
+  echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHz65hcol8K2xBXDSDOyNQnfvio6sHuABm3tL6S5NZud Ilia Anokhin" >> /root/.ssh/authorized_keys
 else
   if [ -d /home/$user ]; then
     group=$user
     mkdir /home/$user/.ssh
     chmod 0700 /home/$user/.ssh
     chown $user:$group /home/$user/.ssh
-    echo "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPn+z0a0dIYNoWb0k2cUTy+1gLs3wVB4NCq0d7po/whmgpEBe7bSlo64hUSzj6Xd53dINcPSKJfFihJmxOIN2oo=" >> /home/$user/.ssh/authorized_keys
-    echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsBJfZ0dOcVLiol9i2QSySDMKlhC5MOhjzXB17ydInw" >> /home/$user/.ssh/authorized_keys
+    echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHz65hcol8K2xBXDSDOyNQnfvio6sHuABm3tL6S5NZud Ilia Anokhin" >> /home/$user/.ssh/authorized_keys
   fi
 fi
 }
@@ -125,6 +125,9 @@ cat << EOF > /etc/ssh/sshd_config.d/10-sshd-custom.conf
 Port 22
 AddressFamily inet
 EOF
+if [ ! -z $PERMIT_ROOT ]; then
+  echo "PermitRootLogin yes" >> /etc/ssh/sshd_config.d/10-sshd-custom.conf
+fi
 systemctl restart ssh > /dev/null 2>&1 && echo "done" || echo "failed!"
 
 if [ ! -z $ADD_SSH_KEYS ]; then
@@ -157,7 +160,7 @@ apt update > /dev/null 2>&1 || "echo failed!; exit 10"
 apt upgrade -y > /dev/null 2>&1 && echo done || "echo failed!; exit 11"
 
 echo -n "Installing additional software: "
-apt install -y command-not-found curl dnsutils haveged htop net-tools sockstat sysstat tcpdump traceroute $platform_agent > /dev/null 2>&1 && echo done || "echo failed!; exit 12"
+apt install -y command-not-found dnsutils haveged htop net-tools sockstat sysstat tcpdump traceroute $platform_agent > /dev/null 2>&1 && echo done || "echo failed!; exit 12"
 echo -n "Performing cleanup: "
 apt-file update > /dev/null 2>&1 || "echo failed!; exit 13"
 update-command-not-found > /dev/null 2>&1 && echo done || "echo failed!; exit 14"
