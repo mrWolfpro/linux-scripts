@@ -6,11 +6,11 @@
 
 function print_help {
   echo ""
-  echo "Usage: $(basename $0) [ --ipv6 ] [ --add-ssh-keys ] [ --enable-root-login ] [ --enable-pxm ]"
+  echo "Usage: $(basename $0) [ --add-ssh-keys ] [ --enable-root-login ] [ --enable-ipv6 ] [ --enable-pxm ]"
   echo ""
-  echo "    --ipv6                Leave IPv6 protocol enabled"
   echo "    --add-ssh-keys        Add SSH keys to authorized_keys"
   echo "    --enable-root-login   Permit root login with password"
+  echo "    --enable-ipv6         Enable IPv6 protocol support"
   echo "    --enable-pxm          Add Proxmox-specific configuration"
   echo "    -h | --help           Print this help message and exit"
   echo ""
@@ -20,9 +20,9 @@ function print_help {
 function args_parse() {
   while [ -n "$1" ]; do
     case "$1" in
-      --ipv6) ENABLE_IPV6=1 ;;
       --add-ssh-keys) ADD_SSH_KEYS=1 ;;
       --enable-root-login) PERMIT_ROOT=1 ;;
+      --enable-ipv6) ENABLE_IPV6=1 ;;
       --enable-pxm) ENABLE_PXM=1 ;;
       -h|--help) PRINT_HELP=1 ;;
       *) echo; echo "Bad option: $1"; print_help ;;
@@ -35,19 +35,31 @@ function detect_platform {
   MINWAIT=2; MAXWAIT=5
   sleep $((MINWAIT+RANDOM % (MAXWAIT-MINWAIT)))
 
-  dmidecode -t 1 | grep -qi qemu
-  if [ $? -eq 0 ]; then
-    echo "QEMU platform detected"
-    platform_agent="qemu-guest-agent"
-  fi
+  HYPERVISOR=$(lscpu | grep "Hypervisor vendor" | cut -d: -f2 | sed -e 's/\ //g')
 
-  dmidecode -t 1 | grep -qi vmware
-  if [ $? -eq 0 ]; then
+  if [ "$HYPERVISOR" = "KVM" ]; then
+    echo "KVM platform detected"
+    PLATFORM_AGENT="qemu-guest-agent"
+  elif [ "$HYPERVISOR" = "VMware" ]; then
     echo "VMware platform detected"
-    platform_agent="open-vm-tools"
+    PLATFORM_AGENT="open-vm-tools"
+  else
+    echo "not detected, assuming baremetal or LXC"
   fi
 
-  sleep 1
+#  dmidecode -t 1 | grep -qi qemu
+#  if [ $? -eq 0 ]; then
+#    echo "QEMU platform detected"
+#    platform_agent="qemu-guest-agent"
+#  fi
+#
+#  dmidecode -t 1 | grep -qi vmware
+#  if [ $? -eq 0 ]; then
+#    echo "VMware platform detected"
+#    platform_agent="open-vm-tools"
+#  fi
+
+  sleep $((MINWAIT+RANDOM % (MAXWAIT-MINWAIT)))
 }
 
 function set_bashrc_vars() {
@@ -102,7 +114,7 @@ fi
 args_parse $@
 [[ ! -z $PRINT_HELP ]] && print_help
 
-echo -n "Detecting hardware platform: "
+echo -n "Detecting hypervisor: "
 detect_platform
 
 echo -n "Setting up bashrc parameters: "
@@ -160,9 +172,10 @@ apt update > /dev/null 2>&1 || "echo failed!; exit 10"
 apt upgrade -y > /dev/null 2>&1 && echo done || "echo failed!; exit 11"
 
 echo -n "Installing additional software: "
-apt install -y command-not-found dnsutils haveged htop net-tools sockstat sysstat tcpdump traceroute $platform_agent > /dev/null 2>&1 && echo done || "echo failed!; exit 12"
+apt install -y command-not-found dnsutils haveged htop net-tools sockstat sysstat tcpdump traceroute $PLATFORM_AGENT > /dev/null 2>&1 && echo done || "echo failed to install packages!; exit 12"
 echo -n "Performing cleanup: "
-apt-file update > /dev/null 2>&1 || "echo failed!; exit 13"
-update-command-not-found > /dev/null 2>&1 && echo done || "echo failed!; exit 14"
+apt autoremove -y > /dev/null 2>&1 || "echo apt autoremove failed!; exit 13"
+apt-file update > /dev/null 2>&1 || "echo apt-file update failed!; exit 14"
+update-command-not-found > /dev/null 2>&1 && echo done || "echo update command-not-found failed!; exit 15"
 
 echo "Server bootstrap finished successfully!"
