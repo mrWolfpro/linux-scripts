@@ -10,9 +10,9 @@ function print_help {
 	echo ""
 	echo "    --add-ssh-keys           Add SSH keys to authorized_keys"
 	echo "    --enable-root-login      Permit root login with password"
-  echo "    --enable-ipv4-forward    Enable IPv4 forwarding support"
+	echo "    --enable-ipv4-forward    Enable IPv4 forwarding support"
 	echo "    --enable-ipv6            Enable IPv6 protocol support"
-	echo "    --enable-pxm             -- Under construction --"
+#	echo "    --enable-pxm             -- Under construction --"
 	echo "    -h | --help              Print this help message and exit"
 	echo ""
 	exit 63
@@ -23,7 +23,7 @@ function args_parse() {
 		case "$1" in
 			--add-ssh-keys) ADD_SSH_KEYS=1 ;;
 			--enable-root-login) PERMIT_ROOT_LOGIN=1 ;;
-      --enable-ipv4-forward) ENABLE_IPV4_FORWARD=1 ;;
+			--enable-ipv4-forward) ENABLE_IPV4_FORWARD=1 ;;
 			--enable-ipv6) ENABLE_IPV6=1 ;;
 #			--enable-pxm) ENABLE_PXM=1 ;;
 			-h|--help) PRINT_HELP=1 ;;
@@ -134,8 +134,8 @@ if [ $ENABLE_IPV4_FORWARD ]; then
 fi
 
 if [ -z $ENABLE_IPV6 ]; then
-	echo -n "Setting up IPv6 protocol support: "
-	disable_ipv6 && echo "IPv6 disabled" || echo "failed to disable IPv6"
+	echo -n "Setting up IPv6 protocol: "
+	disable_ipv6 && echo "disabled" || echo "failed to disable IPv6"
 fi
 
 echo -n "Setting up SSH server: "
